@@ -55,8 +55,10 @@
       </div>
     `;
 
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/battle_history?player_name=${encodeURIComponent(nickname)}`);
+      const base_url = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://127.0.0.1:8000"
+        : "https://pronounceright-1.onrender.com";
+      const response = await fetch(`${base_url}/battle_history?player_name=${encodeURIComponent(nickname)}`);
       if (!response.ok) throw new Error("API error");
       const data = await response.json();
       
@@ -122,7 +124,10 @@
   function connectLobby(lobbyId, nickname, duration = null) {
     const loc = window.location;
     const wsProtocol = loc.protocol === "https:" ? "wss:" : "ws:";
-    let wsUrl = `${wsProtocol}//127.0.0.1:8000/ws/battle/${lobbyId}/${encodeURIComponent(nickname)}`;
+    const wsHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? "127.0.0.1:8000"
+      : "pronounceright-1.onrender.com";
+    let wsUrl = `${wsProtocol}//${wsHost}/ws/battle/${lobbyId}/${encodeURIComponent(nickname)}`;
     if (duration !== null) {
       wsUrl += `?duration=${duration}`;
     }

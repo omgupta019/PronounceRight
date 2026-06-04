@@ -1500,7 +1500,10 @@ function formatBotResponse(text) {
 }
 
 async function getGeminiResponse(userPrompt) {
-  const url = "http://127.0.0.1:8000/vocalcoach_chat";
+  const base_url = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000"
+    : "https://pronounceright-1.onrender.com";
+  const url = `${base_url}/vocalcoach_chat`;
   
   const response = await fetch(url, {
     method: "POST",

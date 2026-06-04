@@ -17,7 +17,9 @@
   const listenBtn = document.getElementById("listenHintBtn");
 
   // ===== GAME STATE variables =====
-  const BASE_URL = "http://127.0.0.1:8000";
+  const BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000"
+    : "https://pronounceright-1.onrender.com";
 
   let challengeWords = [];
   let currentIndex = 0;

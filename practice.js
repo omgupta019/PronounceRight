@@ -1,5 +1,9 @@
 // ===== PRACTICE PAGE - ISOLATED SCOPE =====
 (() => {
+  const BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000"
+    : "https://pronounceright-1.onrender.com";
+
   // ===== STATE VARIABLES =====
   let currentDifficulty = "easy";
   let difficultyMode = "adaptive"; // adaptive or manual
@@ -120,8 +124,6 @@
     };
 
     const backendLang = languageMap[selectedLang] || "en";
-
-    const BASE_URL = "http://127.0.0.1:8000";
 
     try {
       const response = await fetch(
@@ -259,8 +261,6 @@
 
       feedback.textContent = "Analyzing pronunciation...";
       feedback.className = "feedback-text";
-
-      const BASE_URL = "http://127.0.0.1:8000";
 
       const startTime = performance.now();
       const response = await fetch(
@@ -644,7 +644,6 @@ ${sessionResults
     };
 
     const backendLang = languageMap[selectedLang] || "en";
-    const BASE_URL = "http://127.0.0.1:8000";
 
     try {
       const response = await fetch(
