@@ -1,13 +1,8 @@
 import re
 from phonemizer import phonemize
-from phonemizer.backend.espeak.espeak import EspeakBackend
 
-# Load supported languages dynamically from the installed espeak backend
-try:
-    SUPPORTED_ESPEAK_LANGS = set(EspeakBackend.supported_languages().keys())
-except Exception:
-    # Fallback list if dynamic check fails
-    SUPPORTED_ESPEAK_LANGS = {"en-us", "en", "hi", "kn", "ml", "pa", "ta"}
+# Static list of supported espeak languages to prevent slow subprocess spawns during startup
+SUPPORTED_ESPEAK_LANGS = {"en-us", "en", "hi", "kn", "ml", "pa", "ta"}
 
 def text_to_phonemes(text, language):
     if not text:

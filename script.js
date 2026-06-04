@@ -46,16 +46,38 @@ function updateNavbarUI(user) {
     // Show Avatar
     avatar.style.display = "flex";
 
-    const username = user.email.split("@")[0];
+    let username = user.email.split("@")[0];
     avatar.textContent = username.charAt(0).toUpperCase();
     profileName.textContent = username;
     profileEmail.textContent = user.email;
 
-    // Auto-populate lobby username input on battle.html if present and empty
+    // Fetch actual username from profiles table in Supabase asynchronously
+    supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single()
+      .then(({ data, error }) => {
+        if (data && data.username) {
+          username = data.username;
+          avatar.textContent = username.charAt(0).toUpperCase();
+          profileName.textContent = username;
+          
+          // Sync with lobby input if present on battle.html
+          const lobbyInput = document.getElementById("usernameInput");
+          if (lobbyInput) {
+            lobbyInput.value = username;
+            lobbyInput.dispatchEvent(new Event("change"));
+            lobbyInput.dispatchEvent(new Event("blur"));
+          }
+        }
+      })
+      .catch(err => console.error("Failed to fetch username profile", err));
+
+    // Auto-populate lobby username input on battle.html initially
     const lobbyInput = document.getElementById("usernameInput");
     if (lobbyInput && !lobbyInput.value.trim()) {
       lobbyInput.value = username;
-      // Trigger a synthetic event so page-specific script (battle.js) knows
       lobbyInput.dispatchEvent(new Event("change"));
       lobbyInput.dispatchEvent(new Event("blur"));
     }
