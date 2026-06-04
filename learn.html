@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About - PronounceRight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-light-32x32.png" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-dark-32x32.png" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="apple-icon.png" />
+    <!-- IMPORTANT: Load Supabase globally -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="languages.js"></script>
+  </head>
+  <body>
+    <!-- Updated navbar to match consistent design across all pages -->
+    <!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+
+    <!-- Logo -->
+    <a href="index.html" class="logo">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 12C8 12 9.5 16 12 16C14.5 16 16 12 16 12C16 12 14.5 8 12 8C9.5 8 8 12 8 12Z"
+            stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <span>PronounceRight</span>
+    </a>
+
+    <!-- Nav Links -->
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="practice.html">Practice</a>
+      <a href="challenge.html">Challenge</a>
+      <a href="speech_studio.html">Speech Studio</a>
+      <a href="battle.html">Speech Battle</a>
+      <a href="learn.html">About</a>
+    </div>
+
+    <!-- Right Side Actions -->
+    <div class="nav-actions">
+
+      <!-- Language Selector -->
+      <div class="language-selector-nav">
+        <button class="lang-btn-nav" id="navLangBtn">
+          <span class="lang-icon">
+            <svg class="lang-globe-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          </span>
+          <span class="lang-name" id="navLangName">Hindi</span>
+        </button>
+        <div class="lang-dropdown" id="navLangDropdown"></div>
+      </div>
+
+      <!-- Get Started -->
+      <button class="btn-nav-primary" id="navGetStartedBtn">
+        Get Started
+      </button>
+
+      <!-- Login -->
+      <button class="btn-nav-primary" id="navLoginBtn">
+        Login
+      </button>
+
+      <!-- Avatar (hidden until login) -->
+      <div class="avatar-circle" id="avatarCircle">
+        O
+      </div>
+
+      <!-- Profile Dropdown -->
+      <div class="profile-menu" id="profileMenu">
+        <div class="profile-info">
+          <div id="profileName">Username</div>
+          <div id="profileEmail">email@gmail.com</div>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <button id="settingsBtn">Settings</button>
+        <button id="logoutBtn">Log out</button>
+      </div>
+
+      <!-- Mobile -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </div>
+</nav>
+
+    <!-- Learn Hero -->
+    <section class="hero-section">
+      <div class="container">
+        <h1 class="hero-title">Learn Pronunciation</h1>
+        <p class="hero-subtitle">Master the art of clear and confident speaking with our comprehensive guides</p>
+      </div>
+    </section>
+
+    <!-- Learning Modules -->
+    <section class="learning-section">
+      <div class="container">
+        <!-- Interactive Learning Modes -->
+        <div class="learning-module">
+          <h2 class="module-title">Interactive Learning Modes</h2>
+          <div class="module-content">
+            <p>PronounceRight offers four specialized interactive environments designed to take you from a curious beginner to a fluent speaker. Master pronunciations in 9 native scripts with real-time feedback.</p>
+            <div class="phonetic-examples">
+              <div class="phonetic-card">
+                <span class="phonetic-symbol">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-purple);"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                </span>
+                <span class="phonetic-example"><strong>Practice Mode</strong><br>Focus on essential vocabulary grouped by greetings, numbers, family, and food.</span>
+              </div>
+              <div class="phonetic-card">
+                <span class="phonetic-symbol">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-purple);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                </span>
+                <span class="phonetic-example"><strong>Challenge Mode</strong><br>Read full paragraphs under custom time limits (30, 60, or 90 seconds) to build fluency.</span>
+              </div>
+              <div class="phonetic-card">
+                <span class="phonetic-symbol">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-purple);"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                </span>
+                <span class="phonetic-example"><strong>Speech Studio</strong><br>Input custom text, listen to high-quality audio guides, and record your speech to evaluate rate and accuracy.</span>
+              </div>
+              <div class="phonetic-card">
+                <span class="phonetic-symbol">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-purple);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </span>
+                <span class="phonetic-example"><strong>Speech Battle</strong><br>Compete head-to-head in real-time pronunciation duels to climb the live leaderboards.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation & Settings -->
+        <div class="learning-module">
+          <h2 class="module-title">Pronunciation Scoring & Settings</h2>
+          <div class="module-content">
+            <p>Our speech analysis system evaluates your audio input and scores it. You can completely customize the evaluation criteria via the Settings menu in your user profile.</p>
+            <div class="mistake-list">
+              <div class="mistake-item">
+                <h3 class="mistake-word">Accuracy Threshold</h3>
+                <p class="mistake-wrong">❌ Below Threshold (e.g. &lt; 70%) &mdash; Highlighted in Red</p>
+                <p class="mistake-correct">✓ Above Threshold (e.g. &ge; 70%) &mdash; Highlighted in Green</p>
+                <p class="tip-description" style="margin-top: 1rem;">Adjust your passing mark (from 50% to 90%) in Settings to match your current skill level. Words exceeding this value are marked as successfully mastered.</p>
+              </div>
+              <div class="mistake-item">
+                <h3 class="mistake-word">Speech Synthesis Speed</h3>
+                <p class="mistake-wrong">❌ Standard Playback (1.0x) &mdash; Fast voice guides can obscure phonetic details</p>
+                <p class="mistake-correct">✓ Custom Slow Speed (0.7x - 0.9x) &mdash; Allows clear articulation of complex syllables</p>
+                <p class="tip-description" style="margin-top: 1rem;">Control the playback rate of the audio guide synthesizer to break down and hear the phonetic transitions of native speakers.</p>
+              </div>
+              <div class="mistake-item">
+                <h3 class="mistake-word">Real-time Visual Feedback</h3>
+                <p class="mistake-wrong">❌ Static Interface &mdash; Hard to verify if microphone is actively capturing audio</p>
+                <p class="mistake-correct">✓ Animated Waveform &mdash; Visualizer waves bounce dynamically with audio volume</p>
+                <p class="tip-description" style="margin-top: 1rem;">Keep track of input capture status. The interactive voice visualizer wave responds in real-time when clicking "Listen" or "Speak".</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pronunciation Tips -->
+        <div class="learning-module">
+          <h2 class="module-title">Pronunciation Tips</h2>
+          <div class="tips-grid">
+            <div class="tip-card">
+              <div class="tip-number">1</div>
+              <h3 class="tip-title">Listen Actively</h3>
+              <p class="tip-description">Pay close attention to native speakers and try to mimic their pronunciation exactly.</p>
+            </div>
+            <div class="tip-card">
+              <div class="tip-number">2</div>
+              <h3 class="tip-title">Record Yourself</h3>
+              <p class="tip-description">Recording and listening to your own pronunciation helps identify areas for improvement.</p>
+            </div>
+            <div class="tip-card">
+              <div class="tip-number">3</div>
+              <h3 class="tip-title">Practice Daily</h3>
+              <p class="tip-description">Consistent daily practice, even for just 10 minutes, is more effective than occasional long sessions.</p>
+            </div>
+            <div class="tip-card">
+              <div class="tip-number">4</div>
+              <h3 class="tip-title">Focus on Sounds</h3>
+              <p class="tip-description">Master individual sounds before moving on to complex words and sentences.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language-Specific Guides -->
+        <div class="learning-module">
+          <h2 class="module-title">Language-Specific Guides</h2>
+          <div class="language-guides">
+            <div class="language-guide-card">
+              <h3 class="language-name">English</h3>
+              <p class="language-description">Master neutral and region-specific English pronunciation for professional communication.</p>
+              <a href="practice.html?lang=english" class="guide-link">Start Practice →</a>
+            </div>
+            <div class="language-guide-card">
+              <h3 class="language-name">Hindi (हिन्दी)</h3>
+              <p class="language-description">Master Hindi pronunciation and Devanagari script, the most widely spoken language in India.</p>
+              <a href="practice.html?lang=hindi" class="guide-link">Start Practice →</a>
+            </div>
+            <div class="language-guide-card">
+              <h3 class="language-name">Marathi (मराठी)</h3>
+              <p class="language-description">Understand the phonetic and pronunciation nuances of Marathi, widely spoken in Western India.</p>
+              <a href="practice.html?lang=marathi" class="guide-link">Start Practice →</a>
+            </div>
+            <div class="language-guide-card">
+              <h3 class="language-name">Tamil (தமிழ்)</h3>
+              <p class="language-description">Learn the rich phonetic structure of Tamil, one of the oldest classical languages in the world.</p>
+              <a href="practice.html?lang=tamil" class="guide-link">Start Practice →</a>
+            </div>
+            <div class="language-guide-card">
+              <h3 class="language-name">Telugu (తెలుగు)</h3>
+              <p class="language-description">Explore the lyrical and vowel-ending sounds of Telugu, often referred to as the Italian of the East.</p>
+              <a href="practice.html?lang=telugu" class="guide-link">Start Practice →</a>
+            </div>
+            <div class="language-guide-card">
+              <h3 class="language-name">Kannada (ಕನ್ನಡ)</h3>
+              <p class="language-description">Perfect your Kannada pronunciation, a language with rich literary history and beautiful script.</p>
+              <a href="practice.html?lang=kannada" class="guide-link">Start Practice →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Practice CTA -->
+        <div class="cta-section">
+          <h2 class="cta-title">Ready to Practice?</h2>
+          <p class="cta-description">Put your knowledge to the test with our interactive practice exercises</p>
+          <div class="cta-buttons">
+            <a href="practice.html" class="btn btn-primary">Start Practicing</a>
+            <a href="challenge.html" class="btn btn-secondary">Take a Challenge</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-section">
+          <h3 class="footer-title">PronounceRight</h3>
+          <p class="footer-text">Master pronunciation with AI-powered feedback and personalized learning paths.</p>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-subtitle">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="learn.html">Learn</a></li>
+            <li><a href="practice.html">Practice</a></li>
+            <li><a href="challenge.html">Challenge</a></li>
+            <li><a href="speech_studio.html">Speech Studio</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-subtitle">Categories</h4>
+          <ul class="footer-links">
+            <li><a href="practice.html">All Categories</a></li>
+            <li><a href="practice.html?category=celebrity">Celebrity Names</a></li>
+            <li><a href="practice.html?category=common">Common Words</a></li>
+            <li><a href="practice.html?category=business">Business Terms</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-subtitle">Languages</h4>
+          <ul class="footer-links">
+            <li><a href="#" onclick="selectLanguage('english'); return false;">English</a></li>
+            <li><a href="#" onclick="selectLanguage('hindi'); return false;">Hindi</a></li>
+            <li><a href="#" onclick="selectLanguage('marathi'); return false;">Marathi</a></li>
+            <li><a href="#" onclick="selectLanguage('tamil'); return false;">Tamil</a></li>
+            <li><a href="#" onclick="selectLanguage('telugu'); return false;">Telugu</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-subtitle">More Languages</h4>
+          <ul class="footer-links">
+            <li><a href="#" onclick="selectLanguage('kannada'); return false;">Kannada</a></li>
+            <li><a href="#" onclick="selectLanguage('malayalam'); return false;">Malayalam</a></li>
+            <li><a href="#" onclick="selectLanguage('gujarati'); return false;">Gujarati</a></li>
+            <li><a href="#" onclick="selectLanguage('bengali'); return false;">Bengali</a></li>
+            <li><a href="#" onclick="selectLanguage('punjabi'); return false;">Punjabi</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 PronounceRight. All rights reserved.</p>
+      </div>
+    </footer>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="auth-modal">
+    <div class="auth-card">
+      <h2 id="authTitle" class="auth-title">Login</h2>
+
+      <div class="auth-field">
+        <input
+          type="text"
+          id="authUsername"
+          placeholder="Username (for signup)"
+        />
+      </div>
+
+      <div class="auth-field">
+        <input type="email" id="authEmail" placeholder="Email" />
+      </div>
+
+      <div class="auth-field">
+        <input type="password" id="authPassword" placeholder="Password" />
+      </div>
+
+      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%; font-weight: 600;">Login</button>
+
+      <p class="auth-toggle" style="margin-top: 1.25rem;">
+        <span id="authToggleText">Don't have an account?</span>
+        <span id="authToggleBtn" style="color: #a855f7; cursor: pointer; font-weight: 500;">Sign up</span>
+      </p>
+
+      <button id="closeAuthModal" class="auth-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="settings-modal">
+    <div class="settings-card">
+      <button class="settings-close-btn" id="closeSettingsModal">✕</button>
+      <h2 class="settings-title">Settings</h2>
+      <p class="settings-subtitle">Customize your PronounceRight learning experience</p>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Pronunciation & Audio</h3>
+        
+        <div class="settings-field">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label for="settingsSpeakRate" style="margin-bottom: 0;">Voice Playback Speed</label>
+            <span id="speakRateVal" style="font-size: 0.85rem; font-weight: 600; color: white;">0.8x</span>
+          </div>
+          <input type="range" id="settingsSpeakRate" min="0.5" max="1.5" step="0.1" value="0.8" style="accent-color: #fff; cursor: pointer;" />
+        </div>
+        
+        <div class="settings-toggle-row">
+          <div>
+            <label>Auto-Play Pronunciation</label>
+            <span class="settings-toggle-desc">Automatically read word out loud when loading content</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settingsAutoPlay" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Speech Recognition</h3>
+        
+        <div class="settings-field">
+          <label for="settingsAccuracyThreshold">Passing Accuracy Score Threshold</label>
+          <select id="settingsAccuracyThreshold">
+            <option value="50">Easy (50% matching accuracy)</option>
+            <option value="60">Beginner (60% matching accuracy)</option>
+            <option value="70">Standard (70% matching accuracy)</option>
+            <option value="80">Strict (80% matching accuracy)</option>
+            <option value="90">Expert (90% matching accuracy)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="settings-section" id="settingsAccountSection" style="display: none;">
+        <h3 class="settings-section-title">Account Details</h3>
+        <div class="settings-field" style="margin-bottom: 0.75rem;">
+          <label>Username</label>
+          <input type="text" id="settingsUsername" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <div class="settings-field" style="margin-bottom: 1rem;">
+          <label>Email Address</label>
+          <input type="text" id="settingsEmail" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <button class="btn btn-secondary" id="settingsResetPasswordBtn" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Send Password Reset Email</button>
+      </div>
+      
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="cancelSettingsBtn" style="padding: 0.6rem 1.2rem; cursor: pointer;">Cancel</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="padding: 0.6rem 1.2rem; background: white; color: black; border-color: white; font-weight: 600; cursor: pointer;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+    <script type="module" src="script.js"></script>
+
+  </body>
+</html>

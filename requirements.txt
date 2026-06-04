@@ -1,0 +1,8 @@
+fastapi==0.129.0
+uvicorn==0.41.0
+httpx==0.28.1
+python-dotenv==1.2.1
+python-multipart==0.0.22
+supabase==2.28.0
+pydantic==2.12.5
+phonemizer==3.3.0

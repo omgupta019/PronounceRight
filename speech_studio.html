@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech Practice Studio - PronounceRight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="speech_studio.css" />
+    <!-- IMPORTANT: Load Supabase globally -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- IMPORTANT: languages.js MUST be loaded BEFORE other scripts -->
+    <script src="languages.js"></script>
+  </head>
+  <body>
+    <!-- Ambient Glow Background Blobs -->
+    <div class="ambient-glow blob-1"></div>
+    <div class="ambient-glow blob-2"></div>
+
+
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="M8 12C8 12 9.5 16 12 16C14.5 16 16 12 16 12C16 12 14.5 8 12 8C9.5 8 8 12 8 12Z"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+            </svg>
+          </div>
+          <span>PronounceRight</span>
+        </a>
+
+        <!-- Nav Links -->
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="practice.html">Practice</a>
+          <a href="challenge.html">Challenge</a>
+          <a href="speech_studio.html">Speech Studio</a>
+          <a href="battle.html">Speech Battle</a>
+          <a href="learn.html">About</a>
+        </div>
+
+        <!-- Right Side Actions -->
+        <div class="nav-actions">
+          <!-- Language Selector -->
+          <div class="language-selector-nav">
+            <button class="lang-btn-nav" id="navLangBtn">
+              <span class="lang-icon">
+                <svg class="lang-globe-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              </span>
+              <span class="lang-name" id="navLangName">Hindi</span>
+            </button>
+            <div class="lang-dropdown" id="navLangDropdown"></div>
+          </div>
+
+          <!-- Get Started -->
+          <button class="btn-nav-primary" id="navGetStartedBtn">
+            Get Started
+          </button>
+
+          <!-- Login -->
+          <button class="btn-nav-primary" id="navLoginBtn">Login</button>
+
+          <!-- Avatar (hidden until login) -->
+          <div class="avatar-circle" id="avatarCircle">O</div>
+
+          <!-- Profile Dropdown -->
+          <div class="profile-menu" id="profileMenu">
+            <div class="profile-info">
+              <div id="profileName">Username</div>
+              <div id="profileEmail">email@gmail.com</div>
+            </div>
+
+            <div class="profile-divider"></div>
+
+            <button id="settingsBtn">Settings</button>
+            <button id="logoutBtn">Log out</button>
+          </div>
+
+          <!-- Mobile -->
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Body -->
+    <section class="studio-section">
+      <!-- HERO HEADER -->
+      <div class="studio-header">
+        <div class="studio-badge">
+          <span class="badge-dot"></span>
+          <span>Speech Practice Studio</span>
+        </div>
+        <h1 class="studio-title">Speech Practice Studio</h1>
+        <p class="studio-subtitle">
+          Practice your presentations, speeches, interviews, and public speaking with AI-powered pronunciation feedback.
+        </p>
+      </div>
+
+      <!-- SECTION 2: CUSTOM SPEECH INPUT -->
+      <div id="setupView" class="studio-card">
+        <div class="textarea-container">
+          <textarea
+            id="speechTextarea"
+            class="studio-textarea"
+            placeholder="Paste or type your speech here..."
+          ></textarea>
+        </div>
+        
+        <div class="textarea-stats">
+          <div class="stat-item">Words: <span id="wordCount">0</span></div>
+          <div class="stat-item">Characters: <span id="charCount">0</span></div>
+          <div class="stat-item">Est. Speaking Time: <span id="speakingTime">0m 0s</span></div>
+        </div>
+
+        <div class="studio-actions">
+          <button id="startPracticeBtn" class="btn btn-primary btn-large" disabled>
+            <span>Start Practice</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="listenVoiceBtn" class="btn btn-secondary btn-large" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Listen with AI Voice</span>
+          </button>
+          <button id="clearTextBtn" class="btn btn-ghost btn-large">
+            <span>Clear Text</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION 3: PRACTICE CONSOLE -->
+      <div id="practiceView" class="practice-console hidden">
+        <!-- Main practice cards -->
+        <div class="practice-left-col">
+          <div class="studio-card" style="padding: 2rem;">
+            <!-- Progress bar -->
+            <div class="studio-progress-container">
+              <div class="progress-header">
+                <span>Practice Progress</span>
+                <span id="progressText">Sentence 0 of 0</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div id="progressBarFill" class="progress-bar-fill"></div>
+              </div>
+            </div>
+
+            <!-- Teleprompter / Display text -->
+            <div class="teleprompter-container">
+              <div id="teleprompterText" class="teleprompter-text">
+                Current sentence will display here...
+              </div>
+            </div>
+
+            <!-- Teleprompter settings toolbar -->
+            <div class="teleprompter-toolbar">
+              <div class="teleprompter-control-group">
+                <label for="textSizeSlider">Font Size</label>
+                <input type="range" id="textSizeSlider" class="teleprompter-slider" min="1.2" max="2.4" step="0.1" value="1.6">
+              </div>
+              <div class="teleprompter-control-group">
+                <label for="autoScrollToggle" style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" id="autoScrollToggle" style="cursor: pointer;">
+                  Auto-Scroll
+                </label>
+              </div>
+              <div class="teleprompter-control-group">
+                <label for="scrollSpeedSlider">Speed</label>
+                <input type="range" id="scrollSpeedSlider" class="teleprompter-slider" min="1" max="5" step="1" value="2">
+              </div>
+            </div>
+
+            <!-- Recorder block -->
+            <div style="text-align: center; margin: 2rem 0 1rem;">
+              <div id="recordStatusText" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                Ready to speak
+              </div>
+              
+              <div style="position: relative; display: inline-block;">
+                <button id="studioRecordBtn" class="record-trigger-btn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                </button>
+                <div class="record-pulse-ring"></div>
+              </div>
+
+              <!-- Waveform visualization -->
+              <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+            </div>
+
+            <!-- Side-by-side controls -->
+            <div class="console-side-navigation">
+              <button id="prevChunkBtn" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+                <span>Previous</span>
+              </button>
+              <button id="pauseRecordBtn" class="btn btn-secondary" disabled>
+                <span>Pause</span>
+              </button>
+              <button id="retryChunkBtn" class="btn btn-secondary">
+                <span>Retry</span>
+              </button>
+              <button id="nextChunkBtn" class="btn btn-primary">
+                <span>Next</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- SECTION 5: AI COACHING PANEL -->
+          <div id="coachingPanel" class="studio-card coaching-card hidden">
+            <div class="coaching-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="coaching-icon">⚡</span>
+                <span>AI Pronunciation Coach Feedback</span>
+              </div>
+              <div id="studioLatencyBadge" class="latency-badge hidden" style="margin-top: 0;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span id="studioLatencyText">Latency: 0.0s | Local AI model</span>
+              </div>
+            </div>
+
+            <!-- Visual word diff here -->
+            <div id="studioWordDiff" class="word-diff-container studio-word-diff hidden">
+              <div class="word-diff-title">
+                <span>Pronunciation Visual Match</span>
+                <button type="button" class="ask-coach-link-btn hidden" id="studioAskCoachBtn">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 2px;">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                  </svg>
+                  <span>Ask AI Coach</span>
+                </button>
+              </div>
+              <div class="word-diff-text" id="studioWordDiffText"></div>
+              <div class="transcript-heard" id="studioTranscriptHeard"></div>
+            </div>
+
+            <div id="coachingFeedback" class="coaching-content">
+              Speak the sentence to trigger AI pronunciation analysis and tips...
+            </div>
+          </div>
+        </div>
+
+        <!-- Right sidebar column -->
+        <div class="practice-side-panel">
+          <div class="studio-card" style="padding: 1.5rem 2rem;">
+            <h3 style="font-size: 1.15rem; margin-bottom: 1rem; font-family: var(--font-sans); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Current Sentence Info</h3>
+            <div class="stat-box-container">
+              <div class="stat-box">
+                <div id="chunkAccuracy" class="stat-box-num">0%</div>
+                <div class="stat-box-label">Accuracy</div>
+              </div>
+              <div class="stat-box">
+                <div id="chunkWpm" class="stat-box-num">0</div>
+                <div class="stat-box-label">WPM</div>
+              </div>
+              <div class="stat-box" style="grid-column: span 2;">
+                <div id="chunkDuration" class="stat-box-num">0.0s</div>
+                <div class="stat-box-label">Speaking Duration</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="studio-card" style="padding: 1.5rem 2rem;">
+            <h3 style="font-size: 1.15rem; margin-bottom: 1rem; font-family: var(--font-sans); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Session Stats</h3>
+            <div class="stat-box-container">
+              <div class="stat-box">
+                <div id="sessionAccuracy" class="stat-box-num">0%</div>
+                <div class="stat-box-label">Avg Accuracy</div>
+              </div>
+              <div class="stat-box">
+                <div id="sessionWpm" class="stat-box-num">0</div>
+                <div class="stat-box-label">Avg WPM</div>
+              </div>
+              <div class="stat-box" style="grid-column: span 2;">
+                <div id="sessionTime" class="stat-box-num">0:00</div>
+                <div class="stat-box-label">Active Time</div>
+              </div>
+            </div>
+            <button id="endPracticeBtn" class="btn btn-ghost" style="width: 100%; margin-top: 1.25rem;">
+              Finish & View Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: RESULTS DASHBOARD -->
+      <div id="resultsView" class="studio-card results-dashboard-container hidden">
+        <div style="text-align: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+          <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Speech Performance Analysis</h2>
+          <p style="color: var(--text-secondary);">Here is the comprehensive breakdown of your practice session</p>
+        </div>
+
+        <div class="results-stats-row">
+          <div class="results-metric-card">
+            <div class="results-ring-container">
+              <svg class="ring-svg" viewBox="0 0 100 100">
+                <circle class="ring-track" cx="50" cy="50" r="42" />
+                <circle id="resultsRingProgress" class="ring-progress-bar" cx="50" cy="50" r="42" />
+              </svg>
+              <div id="resultsAccuracyVal" class="ring-text">0%</div>
+            </div>
+            <span class="results-metric-label">Overall Accuracy</span>
+          </div>
+
+          <div class="results-metric-card">
+            <div id="resultsWpmVal" class="results-metric-val">0</div>
+            <span class="results-metric-label">Avg WPM</span>
+          </div>
+
+          <div class="results-metric-card">
+            <div id="resultsFluencyVal" class="results-metric-val">0%</div>
+            <span class="results-metric-label">Estimated Fluency</span>
+          </div>
+
+          <div class="results-metric-card">
+            <div id="resultsTimeVal" class="results-metric-val">0:00</div>
+            <span class="results-metric-label">Practice Duration</span>
+          </div>
+        </div>
+
+        <div class="results-metric-card" style="align-items: flex-start; text-align: left; padding: 2rem; margin-top: 1rem;">
+          <h3 style="font-family: var(--font-sans); font-weight: 600; font-size: 1.15rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; width: 100%;">Hardest Words</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">These words were most frequently mispronounced or skipped:</p>
+          <div id="hardWordsContainer" class="hard-words-pills">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="results-metric-card" style="align-items: flex-start; text-align: left; padding: 2rem; margin-top: 1rem;">
+          <h3 style="font-family: var(--font-sans); font-weight: 600; font-size: 1.15rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; width: 100%;">Transcript Comparison</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Review your spoken transcript chunk-by-chunk compared to the text:</p>
+          <div id="transcriptsContainer" class="results-transcripts-list" style="width: 100%;">
+            <!-- dynamically populated -->
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <button id="restartPracticeBtn" class="btn btn-primary btn-large">
+            Practice Again
+          </button>
+          <button id="exitStudioBtn" class="btn btn-secondary btn-large">
+            Back to Home
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">
+            <div class="logo-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <path
+                  d="M8 12C8 12 9.5 16 12 16C14.5 16 16 12 16 12C16 12 14.5 8 12 8C9.5 8 8 12 8 12Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <circle cx="12" cy="12" r="2" fill="currentColor" />
+              </svg>
+            </div>
+            <span>PronounceRight</span>
+          </a>
+          <p>
+            Master pronunciation in Indian languages with AI-powered learning.
+          </p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Learn</h4>
+            <a href="practice.html">Practice</a>
+            <a href="challenge.html">Challenge</a>
+            <a href="speech_studio.html">Speech Studio</a>
+          </div>
+          <div class="footer-column">
+            <h4>Languages</h4>
+            <div class="footer-column-links">
+              <a href="#" onclick="selectLanguage('hindi'); return false;">Hindi</a>
+              <a href="#" onclick="selectLanguage('marathi'); return false;">Marathi</a>
+              <a href="#" onclick="selectLanguage('tamil'); return false;">Tamil</a>
+              <a href="#" onclick="selectLanguage('telugu'); return false;">Telugu</a>
+            </div>
+          </div>
+          <div class="footer-column">
+            <h4>More Languages</h4>
+            <div class="footer-column-links">
+              <a href="#" onclick="selectLanguage('kannada'); return false;">Kannada</a>
+              <a href="#" onclick="selectLanguage('malayalam'); return false;">Malayalam</a>
+              <a href="#" onclick="selectLanguage('gujarati'); return false;">Gujarati</a>
+              <a href="#" onclick="selectLanguage('bengali'); return false;">Bengali</a>
+              <a href="#" onclick="selectLanguage('punjabi'); return false;">Punjabi</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 PronounceRight. All rights reserved.</p>
+      </div>
+    </footer>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="auth-modal">
+    <div class="auth-card">
+      <h2 id="authTitle" class="auth-title">Login</h2>
+
+      <div class="auth-field">
+        <input
+          type="text"
+          id="authUsername"
+          placeholder="Username (for signup)"
+        />
+      </div>
+
+      <div class="auth-field">
+        <input type="email" id="authEmail" placeholder="Email" />
+      </div>
+
+      <div class="auth-field">
+        <input type="password" id="authPassword" placeholder="Password" />
+      </div>
+
+      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%; font-weight: 600;">Login</button>
+
+      <p class="auth-toggle" style="margin-top: 1.25rem;">
+        <span id="authToggleText">Don't have an account?</span>
+        <span id="authToggleBtn" style="color: #a855f7; cursor: pointer; font-weight: 500;">Sign up</span>
+      </p>
+
+      <button id="closeAuthModal" class="auth-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="settings-modal">
+    <div class="settings-card">
+      <button class="settings-close-btn" id="closeSettingsModal">✕</button>
+      <h2 class="settings-title">Settings</h2>
+      <p class="settings-subtitle">Customize your PronounceRight learning experience</p>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Pronunciation & Audio</h3>
+        
+        <div class="settings-field">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label for="settingsSpeakRate" style="margin-bottom: 0;">Voice Playback Speed</label>
+            <span id="speakRateVal" style="font-size: 0.85rem; font-weight: 600; color: white;">0.8x</span>
+          </div>
+          <input type="range" id="settingsSpeakRate" min="0.5" max="1.5" step="0.1" value="0.8" style="accent-color: #fff; cursor: pointer;" />
+        </div>
+        
+        <div class="settings-toggle-row">
+          <div>
+            <label>Auto-Play Pronunciation</label>
+            <span class="settings-toggle-desc">Automatically read word out loud when loading content</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settingsAutoPlay" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Speech Recognition</h3>
+        
+        <div class="settings-field">
+          <label for="settingsAccuracyThreshold">Passing Accuracy Score Threshold</label>
+          <select id="settingsAccuracyThreshold">
+            <option value="50">Easy (50% matching accuracy)</option>
+            <option value="60">Beginner (60% matching accuracy)</option>
+            <option value="70">Standard (70% matching accuracy)</option>
+            <option value="80">Strict (80% matching accuracy)</option>
+            <option value="90">Expert (90% matching accuracy)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="settings-section" id="settingsAccountSection" style="display: none;">
+        <h3 class="settings-section-title">Account Details</h3>
+        <div class="settings-field" style="margin-bottom: 0.75rem;">
+          <label>Username</label>
+          <input type="text" id="settingsUsername" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <div class="settings-field" style="margin-bottom: 1rem;">
+          <label>Email Address</label>
+          <input type="text" id="settingsEmail" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <button class="btn btn-secondary" id="settingsResetPasswordBtn" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Send Password Reset Email</button>
+      </div>
+      
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="cancelSettingsBtn" style="padding: 0.6rem 1.2rem; cursor: pointer;">Cancel</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="padding: 0.6rem 1.2rem; background: white; color: black; border-color: white; font-weight: 600; cursor: pointer;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+    <script type="module" src="script.js"></script>
+    <script src="speech_studio.js"></script>
+  </body>
+</html>

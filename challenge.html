@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speed Challenge - PronounceRight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <!-- IMPORTANT: Load Supabase globally -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- IMPORTANT: languages.js MUST be loaded BEFORE other scripts -->
+    <script src="languages.js"></script>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+
+    <!-- Logo -->
+    <a href="index.html" class="logo">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 12C8 12 9.5 16 12 16C14.5 16 16 12 16 12C16 12 14.5 8 12 8C9.5 8 8 12 8 12Z"
+            stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <span>PronounceRight</span>
+    </a>
+
+    <!-- Nav Links -->
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="practice.html">Practice</a>
+      <a href="challenge.html">Challenge</a>
+      <a href="speech_studio.html">Speech Studio</a>
+      <a href="battle.html">Speech Battle</a>
+      <a href="learn.html">About</a>
+    </div>
+
+    <!-- Right Side Actions -->
+    <div class="nav-actions">
+
+      <!-- Language Selector -->
+      <div class="language-selector-nav">
+        <button class="lang-btn-nav" id="navLangBtn">
+          <span class="lang-icon">
+            <svg class="lang-globe-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          </span>
+          <span class="lang-name" id="navLangName">Hindi</span>
+        </button>
+        <div class="lang-dropdown" id="navLangDropdown"></div>
+      </div>
+
+      <!-- Get Started -->
+      <button class="btn-nav-primary" id="navGetStartedBtn">
+        Get Started
+      </button>
+
+      <!-- Login -->
+      <button class="btn-nav-primary" id="navLoginBtn">
+        Login
+      </button>
+
+      <!-- Avatar (hidden until login) -->
+      <div class="avatar-circle" id="avatarCircle">
+        O
+      </div>
+
+      <!-- Profile Dropdown -->
+      <div class="profile-menu" id="profileMenu">
+        <div class="profile-info">
+          <div id="profileName">Username</div>
+          <div id="profileEmail">email@gmail.com</div>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <button id="settingsBtn">Settings</button>
+        <button id="logoutBtn">Log out</button>
+      </div>
+
+      <!-- Mobile -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </div>
+</nav>
+
+
+    <!-- Challenge Section -->
+    <section class="challenge-section">
+      <!-- Pre-game Screen -->
+      <div class="challenge-pregame" id="pregameScreen">
+        <div class="pregame-content">
+          <div class="challenge-badge">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            Speed Challenge
+          </div>
+          <h1 class="challenge-title">Test Your Speed</h1>
+          <p class="challenge-subtitle">
+            Pronounce as many words as you can in 60 seconds. Say each word
+            correctly to move to the next one.
+          </p>
+
+          <!-- Settings -->
+          <div class="challenge-settings">
+            <div class="setting-group">
+              <label>Duration</label>
+              <div class="duration-options">
+                <button class="duration-btn" data-duration="30">30s</button>
+                <button class="duration-btn active" data-duration="60">
+                  60s
+                </button>
+                <button class="duration-btn" data-duration="120">120s</button>
+              </div>
+            </div>
+            <div class="setting-group">
+              <label>Difficulty</label>
+              <div class="difficulty-options">
+                <button class="difficulty-btn active" data-difficulty="easy">
+                  Easy
+                </button>
+                <button class="difficulty-btn" data-difficulty="medium">
+                  Medium
+                </button>
+                <button class="difficulty-btn" data-difficulty="hard">
+                  Hard
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button id="startChallengeBtn" class="start-challenge-btn">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+            Start Challenge
+          </button>
+
+          <!-- High Score -->
+          <div class="high-score-display">
+            <span class="high-score-label">Your Best</span>
+            <span class="high-score-value" id="highScoreValue">0 WPM</span>
+          </div>
+
+          <!-- Collapsible Recent Runs -->
+          <div class="recent-runs-toggle-container">
+            <button id="toggleRecentRunsBtn" class="recent-runs-toggle-btn">
+              <span>Show Recent Runs</span>
+              <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="recentRunsCollapsePanel" class="recent-runs-collapse-panel">
+            <div class="challenge-history-list" id="challengeHistoryList">
+              <!-- Dynamic history items go here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Screen -->
+      <div class="challenge-game hidden" id="gameScreen">
+        <!-- Top Bar with Timer and Stats -->
+        <div class="game-top-bar">
+          <div class="timer-display">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span class="timer-value" id="timerValue">60</span>
+          </div>
+          <div class="live-stats">
+            <div class="live-stat">
+              <span class="live-stat-value" id="correctCount">0</span>
+              <span class="live-stat-label">Correct</span>
+            </div>
+            <div class="live-stat">
+              <span class="live-stat-value" id="liveWpm">0</span>
+              <span class="live-stat-label">WPM</span>
+            </div>
+            <div class="live-stat">
+              <span class="live-stat-value" id="streakCount">0</span>
+              <span class="live-stat-label">Streak</span>
+            </div>
+          </div>
+          <button id="endChallengeBtn" class="end-btn">End</button>
+        </div>
+
+        <!-- Words Display Area -->
+        <div class="words-display-area">
+          <div class="words-container" id="wordsContainer">
+            <!-- Words will be generated here -->
+          </div>
+        </div>
+
+        <!-- Sleek Pronunciation Hint Bar -->
+        <div class="challenge-hint-bar">
+          <span class="hint-label">Pronunciation Hint:</span>
+          <span class="hint-phonetic" id="currentPhonetic"></span>
+          <button id="listenHintBtn" class="listen-hint-btn" title="Listen to pronunciation">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+            <span>Listen Hint</span>
+          </button>
+        </div>
+
+        <!-- Recording Status -->
+        <div class="recording-status-bar">
+          <div class="status-indicator recording" id="statusIndicator">
+            <span class="pulse-dot"></span>
+            <span>Listening...</span>
+          </div>
+          <div class="transcript-preview" id="transcriptPreview">
+            <span class="transcript-label">You said:</span>
+            <span class="transcript-text" id="userTranscript">-</span>
+          </div>
+        </div>
+
+        <!-- Feedback Flash -->
+        <div class="feedback-flash hidden" id="feedbackFlash">
+          <span class="feedback-icon"></span>
+          <span class="feedback-text"></span>
+        </div>
+      </div>
+
+      <!-- Results Screen -->
+      <div class="challenge-results hidden" id="resultsScreen">
+        <div class="results-content">
+          <div class="results-badge">Challenge Complete</div>
+          <h2 class="results-title">Great Effort!</h2>
+
+          <!-- Main Score -->
+          <div class="main-score-display">
+            <span class="main-score-value" id="finalWpm">0</span>
+            <span class="main-score-unit">WPM</span>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="results-stats-grid">
+            <div class="result-stat">
+              <span class="result-stat-value" id="totalCorrect">0</span>
+              <span class="result-stat-label">Words Correct</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-value" id="totalAttempts">0</span>
+              <span class="result-stat-label">Total Attempts</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-value" id="accuracyPercent">0%</span>
+              <span class="result-stat-label">Accuracy</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-value" id="bestStreak">0</span>
+              <span class="result-stat-label">Best Streak</span>
+            </div>
+          </div>
+
+          <!-- New High Score Banner -->
+          <div class="new-high-score hidden" id="newHighScore">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              />
+            </svg>
+            New Personal Best!
+          </div>
+
+          <!-- Words Summary -->
+          <div class="words-summary" id="wordsSummary">
+            <h4>Words Pronounced</h4>
+            <div class="words-summary-list" id="wordsSummaryList">
+              <!-- Filled dynamically -->
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="results-actions">
+            <button class="btn btn-primary btn-lg" onclick="restartChallenge()">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 2v6h-6" />
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                <path d="M3 22v-6h6" />
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+              </svg>
+              Try Again
+            </button>
+            <button class="btn btn-ghost btn-lg" onclick="goToHome()">
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="auth-modal">
+    <div class="auth-card">
+      <h2 id="authTitle" class="auth-title">Login</h2>
+
+      <div class="auth-field">
+        <input
+          type="text"
+          id="authUsername"
+          placeholder="Username (for signup)"
+        />
+      </div>
+
+      <div class="auth-field">
+        <input type="email" id="authEmail" placeholder="Email" />
+      </div>
+
+      <div class="auth-field">
+        <input type="password" id="authPassword" placeholder="Password" />
+      </div>
+
+      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%; font-weight: 600;">Login</button>
+
+      <p class="auth-toggle" style="margin-top: 1.25rem;">
+        <span id="authToggleText">Don't have an account?</span>
+        <span id="authToggleBtn" style="color: #a855f7; cursor: pointer; font-weight: 500;">Sign up</span>
+      </p>
+
+      <button id="closeAuthModal" class="auth-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="settings-modal">
+    <div class="settings-card">
+      <button class="settings-close-btn" id="closeSettingsModal">✕</button>
+      <h2 class="settings-title">Settings</h2>
+      <p class="settings-subtitle">Customize your PronounceRight learning experience</p>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Pronunciation & Audio</h3>
+        
+        <div class="settings-field">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label for="settingsSpeakRate" style="margin-bottom: 0;">Voice Playback Speed</label>
+            <span id="speakRateVal" style="font-size: 0.85rem; font-weight: 600; color: white;">0.8x</span>
+          </div>
+          <input type="range" id="settingsSpeakRate" min="0.5" max="1.5" step="0.1" value="0.8" style="accent-color: #fff; cursor: pointer;" />
+        </div>
+        
+        <div class="settings-toggle-row">
+          <div>
+            <label>Auto-Play Pronunciation</label>
+            <span class="settings-toggle-desc">Automatically read word out loud when loading content</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settingsAutoPlay" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Speech Recognition</h3>
+        
+        <div class="settings-field">
+          <label for="settingsAccuracyThreshold">Passing Accuracy Score Threshold</label>
+          <select id="settingsAccuracyThreshold">
+            <option value="50">Easy (50% matching accuracy)</option>
+            <option value="60">Beginner (60% matching accuracy)</option>
+            <option value="70">Standard (70% matching accuracy)</option>
+            <option value="80">Strict (80% matching accuracy)</option>
+            <option value="90">Expert (90% matching accuracy)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="settings-section" id="settingsAccountSection" style="display: none;">
+        <h3 class="settings-section-title">Account Details</h3>
+        <div class="settings-field" style="margin-bottom: 0.75rem;">
+          <label>Username</label>
+          <input type="text" id="settingsUsername" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <div class="settings-field" style="margin-bottom: 1rem;">
+          <label>Email Address</label>
+          <input type="text" id="settingsEmail" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <button class="btn btn-secondary" id="settingsResetPasswordBtn" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Send Password Reset Email</button>
+      </div>
+      
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="cancelSettingsBtn" style="padding: 0.6rem 1.2rem; cursor: pointer;">Cancel</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="padding: 0.6rem 1.2rem; background: white; color: black; border-color: white; font-weight: 600; cursor: pointer;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Load scripts in correct order -->
+    <script type="module" src="script.js"></script>
+
+    <script src="challenge.js"></script>
+  </body>
+</html>

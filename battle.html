@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplayer Speech Battle - PronounceRight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="battle.css" />
+    <!-- IMPORTANT: Load Supabase globally -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="languages.js"></script>
+  </head>
+  <body class="battle-page-body">
+    <!-- Ambient Glow Background Blobs -->
+    <div class="ambient-glow blob-1"></div>
+    <div class="ambient-glow blob-2"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <path d="M8 12C8 12 9.5 16 12 16C14.5 16 16 12 16 12C16 12 14.5 8 12 8C9.5 8 8 12 8 12Z" stroke="currentColor" stroke-width="2" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+            </svg>
+          </div>
+          <span>PronounceRight</span>
+        </a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="practice.html">Practice</a>
+          <a href="challenge.html">Challenge</a>
+          <a href="speech_studio.html">Speech Studio</a>
+          <a href="battle.html" class="active">Speech Battle</a>
+          <a href="learn.html">About</a>
+        </div>
+        <!-- Right Side Actions -->
+        <div class="nav-actions">
+          <!-- Language Selector -->
+          <div class="language-selector-nav">
+            <button class="lang-btn-nav" id="navLangBtn">
+              <span class="lang-icon">
+                <svg class="lang-globe-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              </span>
+              <span class="lang-name" id="navLangName">Hindi</span>
+            </button>
+            <div class="lang-dropdown" id="navLangDropdown"></div>
+          </div>
+
+          <!-- Get Started -->
+          <button class="btn-nav-primary" id="navGetStartedBtn">
+            Get Started
+          </button>
+
+          <!-- Login -->
+          <button class="btn-nav-primary" id="navLoginBtn">Login</button>
+
+          <!-- Avatar (hidden until login) -->
+          <div class="avatar-circle" id="avatarCircle">O</div>
+
+          <!-- Profile Dropdown -->
+          <div class="profile-menu" id="profileMenu">
+            <div class="profile-info">
+              <div id="profileName">Username</div>
+              <div id="profileEmail">email@gmail.com</div>
+            </div>
+
+            <div class="profile-divider"></div>
+
+            <button id="settingsBtn">Settings</button>
+            <button id="logoutBtn">Log out</button>
+          </div>
+
+          <!-- Mobile -->
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Battle Section Container -->
+    <main class="battle-container">
+      
+      <!-- SETUP / LOBBY SCREEN -->
+      <section id="setupScreen" class="setup-screen">
+        <div class="setup-header">
+          <div class="battle-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Real-Time Speech Battle
+          </div>
+          <h1>Multiplayer Speech Arena</h1>
+          <p>Challenge friends in real-time. Pronounce paragraphs faster and with higher accuracy to win!</p>
+        </div>
+
+        <div class="setup-grid">
+          <!-- Left side layout containing Nickname block and Sub-grid actions -->
+          <div class="setup-left-col">
+            <!-- Nickname Card -->
+            <div class="setup-card glass-panel nickname-card">
+              <div class="nickname-card-content">
+                <div class="nickname-info">
+                  <div class="avatar-glow">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  </div>
+                  <div>
+                    <h2>Your Nickname</h2>
+                    <p>Enter a name to represent yourself in the arena.</p>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <input type="text" id="usernameInput" placeholder="Enter nickname..." maxlength="15" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Match Actions Grid (Host vs Join) -->
+            <div class="lobby-actions-grid">
+              <!-- Create Match Card -->
+              <div class="setup-card glass-panel action-card">
+                <div class="action-card-header">
+                  <div class="action-icon host-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                  </div>
+                  <div>
+                    <h2>Host a Match</h2>
+                    <p>Create a private room and invite a friend.</p>
+                  </div>
+                </div>
+
+                <div class="action-card-body">
+                  <div class="match-settings-row">
+                    <label for="matchDurationSelect">Match Duration</label>
+                    <select id="matchDurationSelect" class="match-duration-select">
+                      <option value="30">30 Seconds</option>
+                      <option value="60" selected>60 Seconds</option>
+                      <option value="90">90 Seconds</option>
+                      <option value="0">Unlimited (Sprint)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button type="button" class="btn-battle-primary host-btn" id="createRoomBtn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Create Private Room
+                </button>
+              </div>
+
+              <!-- Join Match Card -->
+              <div class="setup-card glass-panel action-card">
+                <div class="action-card-header">
+                  <div class="action-icon join-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                  </div>
+                  <div>
+                    <h2>Join a Match</h2>
+                    <p>Enter an active private room code to join.</p>
+                  </div>
+                </div>
+
+                <div class="action-card-body">
+                  <div class="match-settings-row">
+                    <label for="roomCodeInput">Room Code</label>
+                    <input type="text" id="roomCodeInput" placeholder="Code (e.g. PR-8472)" maxlength="7" />
+                  </div>
+                </div>
+
+                <button type="button" class="btn-battle-secondary join-btn" id="joinRoomBtn">
+                  Join Match
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- History & Leaderboard Card -->
+          <div class="setup-card glass-panel stats-panel">
+            <h2>Your Battle History</h2>
+            <div class="history-list" id="historyList">
+              <div class="history-placeholder">
+                Enter your nickname and play matches to track your records!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ACTIVE GAME SCREEN -->
+      <section id="battleScreen" class="battle-screen hidden">
+        
+        <!-- Game Info / Status Bar -->
+        <div class="lobby-info-bar glass-panel">
+          <div class="lobby-code-display">
+            Room Code: <strong id="lobbyCodeLabel">PR-XXXX</strong>
+          </div>
+          <div class="battle-timer-container hidden" id="battleTimerContainer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Time Left:</span> <strong id="battleTimerLabel">60s</strong>
+          </div>
+          <div id="gameStatusLabel" class="game-status-label">
+            Waiting for players... (1/2)
+          </div>
+        </div>
+
+        <!-- Players Sidebar / Progress Dashboard -->
+        <div class="arena-layout">
+          
+          <!-- Shared Paragraph Display -->
+          <div class="arena-main glass-panel">
+            <div class="arena-header">
+              <div class="mode-badge">MULTIPLAYER PARAGRAPH SPEED RUN</div>
+              <div class="microphone-visualizer" id="micStatus">
+                <span class="pulse-dot"></span> Ready to Speak
+              </div>
+            </div>
+
+            <!-- Paragraph Words Display -->
+            <div class="paragraph-display-box">
+              <div class="words-display-area" id="wordsDisplayArea">
+                <!-- Words populated by JS -->
+                <span class="word-span">Waiting</span> <span class="word-span">for</span> <span class="word-span">game</span> <span class="word-span">to</span> <span class="word-span">start...</span>
+              </div>
+            </div>
+
+            <!-- Recording Console Area -->
+            <div class="microphone-section">
+              <button type="button" class="record-btn-multi" id="recordBtnMulti" disabled>
+                <span id="recordBtnIcon" style="display: inline-flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg></span> <span id="recordBtnText">Start Speaking</span>
+              </button>
+              <p class="match-hint">Press the button and read the paragraph continuously. The system automatically highlights spoken words.</p>
+              
+              <!-- Live Transcript Box -->
+              <div class="live-transcript-box hidden" id="liveTranscriptBox">
+                <span class="transcript-title">Listening:</span>
+                <p id="liveTranscriptText" class="transcript-content">...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Player Dashboards (Right sidebar) -->
+          <aside class="arena-sidebar">
+            <!-- Player 1 (Local) Card -->
+            <div class="player-hud-card glass-panel" id="playerHudLocal">
+              <div class="hud-header">
+                <div class="avatar-circle avatar-local">You</div>
+                <div class="hud-player-name" id="localPlayerNameLabel">Player 1</div>
+                <span class="ready-badge hidden" id="localReadyLabel">Ready</span>
+              </div>
+              <div class="hud-stats-grid">
+                <div class="hud-stat-item">
+                  <span class="hud-stat-num" id="localWpmLabel">0</span>
+                  <span class="hud-stat-desc">WPM</span>
+                </div>
+                <div class="hud-stat-item">
+                  <span class="hud-stat-num" id="localAccuracyLabel">0%</span>
+                  <span class="hud-stat-desc">Accuracy</span>
+                </div>
+                <div class="hud-stat-item">
+                  <span class="hud-stat-num" id="localStreakLabel">0</span>
+                  <span class="hud-stat-desc">Streak</span>
+                </div>
+              </div>
+              <div class="hud-progress-container">
+                <div class="hud-progress-fill" id="localProgressFill" style="width: 0%;"></div>
+              </div>
+              <button type="button" class="btn-ready" id="readyBtnLocal">Toggle Ready</button>
+            </div>
+
+            <!-- Player 2 (Opponent) Card -->
+            <div class="player-hud-card glass-panel" id="playerHudOpponent">
+              <div class="hud-header">
+                <div class="avatar-circle avatar-opponent">OP</div>
+                <div class="hud-player-name" id="opponentPlayerNameLabel">Waiting for Opponent...</div>
+                <span class="ready-badge hidden" id="opponentReadyLabel">Ready</span>
+              </div>
+              <div class="hud-stats-grid">
+                <div class="hud-stat-item">
+                  <span class="hud-stat-num" id="opponentWpmLabel">0</span>
+                  <span class="hud-stat-desc">WPM</span>
+                </div>
+                <div class="hud-stat-item">
+                  <span class="hud-stat-num" id="opponentAccuracyLabel">0%</span>
+                  <span class="hud-stat-desc">Accuracy</span>
+                </div>
+                <div class="hud-stat-item">
+                  <span class="hud-stat-num" id="opponentStreakLabel">0</span>
+                  <span class="hud-stat-desc">Streak</span>
+                </div>
+              </div>
+              <div class="hud-progress-container">
+                <div class="hud-progress-fill" id="opponentProgressFill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <!-- COUNTDOWN OVERLAY -->
+    <div class="countdown-overlay hidden" id="countdownOverlay">
+      <div class="countdown-number" id="countdownNumber">3</div>
+    </div>
+
+    <!-- SCOREBOARD COMPARISON MODAL -->
+    <div class="scoreboard-modal hidden" id="scoreboardModal">
+      <div class="scoreboard-card glass-panel">
+        <h2 id="matchResultTitle">Victory!</h2>
+        <p class="scoreboard-subtitle">Side-by-Side Statistics Comparison</p>
+
+        <div class="scoreboard-grid">
+          <!-- Player Stat Card -->
+          <div class="scoreboard-player-column local-winner" id="scoreboardLocalCol">
+            <div class="scoreboard-avatar">You</div>
+            <h3 id="scoreboardLocalName">Player 1</h3>
+            <div class="scoreboard-result-badge win">WINNER</div>
+            
+            <div class="scoreboard-stats-list">
+              <div class="scoreboard-stat-row">
+                <span class="stat-lbl">Final WPM</span>
+                <strong class="stat-val" id="sbLocalWpm">0</strong>
+              </div>
+              <div class="scoreboard-stat-row">
+                <span class="stat-lbl">Accuracy</span>
+                <strong class="stat-val" id="sbLocalAccuracy">0%</strong>
+              </div>
+              <div class="scoreboard-stat-row">
+                <span class="stat-lbl">Max Streak</span>
+                <strong class="stat-val" id="sbLocalStreak">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="vs-divider">VS</div>
+
+          <!-- Opponent Stat Card -->
+          <div class="scoreboard-player-column opponent-loser" id="scoreboardOpponentCol">
+            <div class="scoreboard-avatar">OP</div>
+            <h3 id="scoreboardOpponentName">Player 2</h3>
+            <div class="scoreboard-result-badge loss">DEFEATED</div>
+
+            <div class="scoreboard-stats-list">
+              <div class="scoreboard-stat-row">
+                <span class="stat-lbl">Final WPM</span>
+                <strong class="stat-val" id="sbOpponentWpm">0</strong>
+              </div>
+              <div class="scoreboard-stat-row">
+                <span class="stat-lbl">Accuracy</span>
+                <strong class="stat-val" id="sbOpponentAccuracy">0%</strong>
+              </div>
+              <div class="scoreboard-stat-row">
+                <span class="stat-lbl">Max Streak</span>
+                <strong class="stat-val" id="sbOpponentStreak">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scoreboard-actions">
+          <button type="button" class="btn-battle-secondary" id="exitBattleBtn">Exit Room</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="auth-modal">
+    <div class="auth-card">
+      <h2 id="authTitle" class="auth-title">Login</h2>
+
+      <div class="auth-field">
+        <input
+          type="text"
+          id="authUsername"
+          placeholder="Username (for signup)"
+        />
+      </div>
+
+      <div class="auth-field">
+        <input type="email" id="authEmail" placeholder="Email" />
+      </div>
+
+      <div class="auth-field">
+        <input type="password" id="authPassword" placeholder="Password" />
+      </div>
+
+      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%; font-weight: 600;">Login</button>
+
+      <p class="auth-toggle" style="margin-top: 1.25rem;">
+        <span id="authToggleText">Don't have an account?</span>
+        <span id="authToggleBtn" style="color: #a855f7; cursor: pointer; font-weight: 500;">Sign up</span>
+      </p>
+
+      <button id="closeAuthModal" class="auth-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="settings-modal">
+    <div class="settings-card">
+      <button class="settings-close-btn" id="closeSettingsModal">✕</button>
+      <h2 class="settings-title">Settings</h2>
+      <p class="settings-subtitle">Customize your PronounceRight learning experience</p>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Pronunciation & Audio</h3>
+        
+        <div class="settings-field">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label for="settingsSpeakRate" style="margin-bottom: 0;">Voice Playback Speed</label>
+            <span id="speakRateVal" style="font-size: 0.85rem; font-weight: 600; color: white;">0.8x</span>
+          </div>
+          <input type="range" id="settingsSpeakRate" min="0.5" max="1.5" step="0.1" value="0.8" style="accent-color: #fff; cursor: pointer;" />
+        </div>
+        
+        <div class="settings-toggle-row">
+          <div>
+            <label>Auto-Play Pronunciation</label>
+            <span class="settings-toggle-desc">Automatically read word out loud when loading content</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settingsAutoPlay" />
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3 class="settings-section-title">Speech Recognition</h3>
+        
+        <div class="settings-field">
+          <label for="settingsAccuracyThreshold">Passing Accuracy Score Threshold</label>
+          <select id="settingsAccuracyThreshold">
+            <option value="50">Easy (50% matching accuracy)</option>
+            <option value="60">Beginner (60% matching accuracy)</option>
+            <option value="70">Standard (70% matching accuracy)</option>
+            <option value="80">Strict (80% matching accuracy)</option>
+            <option value="90">Expert (90% matching accuracy)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="settings-section" id="settingsAccountSection" style="display: none;">
+        <h3 class="settings-section-title">Account Details</h3>
+        <div class="settings-field" style="margin-bottom: 0.75rem;">
+          <label>Username</label>
+          <input type="text" id="settingsUsername" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <div class="settings-field" style="margin-bottom: 1rem;">
+          <label>Email Address</label>
+          <input type="text" id="settingsEmail" readonly style="opacity: 0.7; cursor: not-allowed;" />
+        </div>
+        <button class="btn btn-secondary" id="settingsResetPasswordBtn" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Send Password Reset Email</button>
+      </div>
+      
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="cancelSettingsBtn" style="padding: 0.6rem 1.2rem; cursor: pointer;">Cancel</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" style="padding: 0.6rem 1.2rem; background: white; color: black; border-color: white; font-weight: 600; cursor: pointer;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Script imports -->
+    <script type="module" src="script.js"></script>
+    <script src="battle.js"></script>
+  </body>
+</html>
