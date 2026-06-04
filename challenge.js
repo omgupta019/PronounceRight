@@ -37,6 +37,8 @@
   let wordsPronounced = [];
   let lastMatchedIndex = -1;
   let lastProcessedIndex = -1;
+  let currentSegmentIndex = -1;
+  let matchedWordsCountInSegment = 0;
   let feedbackTimeout = null;
 
   // ===== INITIALIZATION =====
@@ -247,6 +249,8 @@
     wordsPronounced = [];
     lastMatchedIndex = -1;
     lastProcessedIndex = -1;
+    currentSegmentIndex = -1;
+    matchedWordsCountInSegment = 0;
     feedbackTimeout = null;
 
     if (streakCount) streakCount.textContent = 0;
@@ -413,22 +417,77 @@
       const result = event.results[resultIndex];
       const transcript = result[0].transcript.trim();
 
-      // 1. If we already matched this result index, ignore it completely
-      if (resultIndex <= lastMatchedIndex) {
-        return;
+      // Reset matched word counter if we moved to a new speech segment
+      if (resultIndex > currentSegmentIndex) {
+        currentSegmentIndex = resultIndex;
+        matchedWordsCountInSegment = 0;
       }
 
-      const targetWord = challengeWords[currentIndex].text;
-      const matchResult = evaluateMatch(targetWord, transcript);
-      const accuracy = matchResult.accuracy;
-      const isCorrect = matchResult.isCorrect;
+      // Split the transcript of the current segment into words
+      const spokenWords = transcript.split(/\s+/).filter(w => w.length > 0);
+      
+      while (true) {
+        // We only consider words that haven't been matched yet in this segment
+        const unmatchedSpokenWords = spokenWords.slice(matchedWordsCountInSegment);
+        if (unmatchedSpokenWords.length === 0) break;
 
-      if (isCorrect) {
-        lastMatchedIndex = resultIndex;
-        evaluateSpeech(transcript, true, accuracy);
-      } else if (result.isFinal && resultIndex > lastProcessedIndex) {
-        lastProcessedIndex = resultIndex;
-        evaluateSpeech(transcript, false, accuracy);
+        const targetPhrase = challengeWords[currentIndex].text;
+        const targetPhraseWords = targetPhrase.split(/\s+/).filter(w => w.length > 0);
+        const targetWordCount = targetPhraseWords.length;
+
+        let bestMatch = null;
+        let bestMatchLength = 0;
+        let bestMatchOffset = 0;
+        let maxSeenAccuracy = 0;
+
+        // Try offsets 0 and 1
+        for (let offset = 0; offset <= 1; offset++) {
+          if (offset >= unmatchedSpokenWords.length) break;
+
+          const minLen = Math.max(1, targetWordCount - 1);
+          const maxLen = Math.min(unmatchedSpokenWords.length - offset, targetWordCount + 1);
+
+          for (let len = minLen; len <= maxLen; len++) {
+            const candidateWords = unmatchedSpokenWords.slice(offset, offset + len);
+            if (candidateWords.length === 0) continue;
+            const candidate = candidateWords.join(" ");
+            const matchResult = evaluateMatch(targetPhrase, candidate);
+
+            if (matchResult.accuracy > maxSeenAccuracy) {
+              maxSeenAccuracy = matchResult.accuracy;
+            }
+
+            if (matchResult.isCorrect) {
+              if (!bestMatch || matchResult.accuracy > bestMatch.accuracy) {
+                bestMatch = matchResult;
+                bestMatchLength = len;
+                bestMatchOffset = offset;
+              }
+            }
+          }
+        }
+
+        if (bestMatch) {
+          // Correct match found! Consume and evaluate
+          matchedWordsCountInSegment += (bestMatchOffset + bestMatchLength);
+          evaluateSpeech(
+            unmatchedSpokenWords.slice(bestMatchOffset, bestMatchOffset + bestMatchLength).join(" "),
+            true,
+            bestMatch.accuracy
+          );
+        } else {
+          // No correct match. If final, we consume the expected length as incorrect
+          if (result.isFinal) {
+            const wordsToConsume = Math.min(unmatchedSpokenWords.length, targetWordCount);
+            const spokenFailureText = unmatchedSpokenWords.slice(0, wordsToConsume).join(" ");
+            
+            matchedWordsCountInSegment += wordsToConsume;
+            evaluateSpeech(spokenFailureText, false, maxSeenAccuracy);
+          } else {
+            // If not final and no match, we don't consume yet (wait for final or future match)
+            break;
+          }
+        }
       }
     };
 
@@ -510,6 +569,13 @@
       currentStreak = 0;
       if (streakCount) streakCount.textContent = currentStreak;
       showFeedback(false);
+
+      // Go to next word even if incorrect (do not halt progress)
+      currentIndex++;
+      if (currentIndex >= challengeWords.length) {
+        currentIndex = 0; // wrap around
+      }
+      updateActiveWordHighlight();
     }
 
     updateWPM();

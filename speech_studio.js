@@ -162,11 +162,8 @@
       const text = speechTextarea.value.trim();
       if (!text) return;
 
-      // Split into logical sentences/chunks (period, question, exclamation, or newline)
-      chunks = text
-        .split(/[.!?\n\u0964\u0965]+/)
-        .map(s => s.trim())
-        .filter(s => s.length > 2); // Avoid very small scraps (like single punctuation or letters)
+      // Keep the entire text as a single chunk to practice all at once (prevent sentence-by-sentence splitting)
+      chunks = [text];
 
       if (chunks.length === 0) {
         alert("Please enter a longer speech to practice.");
@@ -203,9 +200,8 @@
 
 
     // Progress percentage
-    const progressPercent = Math.round(((index) / chunks.length) * 100);
-    progressText.textContent = `Sentence ${index + 1} of ${chunks.length}`;
-    progressBarFill.style.width = `${progressPercent}%`;
+    progressText.textContent = "Full Speech Practice";
+    progressBarFill.style.width = "100%";
 
     // Load chunk text
     const text = chunks[index];

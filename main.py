@@ -359,8 +359,17 @@ def calculate_accuracy_py(expected, predicted, language):
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6L5241gckMicIfyc3L7g17jQotoa0mOBIwQxRuxzhVMXg")
 
-async def get_gemini_coaching_feedback(expected_text: str, transcript: str, accuracy: float, wpm: int, fluency: float) -> str:
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+async def get_groq_coaching_feedback(expected_text: str, transcript: str, accuracy: float, wpm: int, fluency: float) -> str:
+    groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not groq_api_key:
+        return "Excellent attempt! Continue practicing to increase your pacing and accuracy."
+        
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {groq_api_key}",
+        "Content-Type": "application/json"
+    }
+    
     system_instruction = (
         "You are the AI Speech Coach for PronounceRight. The user is practicing a speech/presentation.\n"
         "Analyze the pronunciation accuracy, pacing (WPM), and fluency, and provide constructive, encouraging feedback.\n"
@@ -374,21 +383,27 @@ async def get_gemini_coaching_feedback(expected_text: str, transcript: str, accu
         f"Speaking Pace: {wpm} WPM\n"
         f"Fluency: {fluency}%"
     )
+    
     payload = {
-        "contents": [
-            {"parts": [{"text": f"{system_instruction}\n\nUser Query: {user_prompt}"}]}
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": user_prompt}
         ]
     }
+    
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(url, json=payload)
+            response = await client.post(url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                reply = data["candidates"][0]["content"]["parts"][0]["text"]
+                reply = data["choices"][0]["message"]["content"]
                 return reply.strip()
             else:
+                print(f"Groq Chat completions returned status code {response.status_code}: {response.text}")
                 return "Good try! Focus on stressing key words and maintaining a steady pace throughout the sentence."
-    except Exception:
+    except Exception as e:
+        print(f"Groq feedback error: {e}")
         return "Excellent attempt! Continue practicing to increase your pacing and accuracy."
 
 @app.post("/custom_speech_analyze")
@@ -434,7 +449,7 @@ async def custom_speech_analyze(
 
     os.remove(temp_filename)
 
-    feedback = await get_gemini_coaching_feedback(expected_text, predicted_text, accuracy, wpm, fluency)
+    feedback = await get_groq_coaching_feedback(expected_text, predicted_text, accuracy, wpm, fluency)
 
     return JSONResponse({
         "transcript": predicted_text,
@@ -790,14 +805,18 @@ class ChatRequest(BaseModel):
 
 @app.post("/vocalcoach_chat")
 async def vocalcoach_chat(request: ChatRequest):
-    gemini_api_key = os.getenv("GEMINI_API_KEY")
-    if not gemini_api_key:
+    groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not groq_api_key:
         return JSONResponse(
             status_code=500,
-            content={"message": "Gemini API key is not configured on the backend server."}
+            content={"message": "Groq API key is not configured on the backend server."}
         )
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_api_key}"
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {groq_api_key}",
+        "Content-Type": "application/json"
+    }
     
     system_instruction = (
         "You are VocalCoach AI, an encouraging and expert AI assistant built inside the PronounceRight language platform. "
@@ -808,30 +827,26 @@ async def vocalcoach_chat(request: ChatRequest):
     )
     
     payload = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": f"{system_instruction}\n\nUser Query: {request.prompt}"
-                    }
-                ]
-            }
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": request.prompt}
         ]
     }
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(url, json=payload, headers={"Content-Type": "application/json"})
+            response = await client.post(url, json=payload, headers=headers)
             
             if response.status_code != 200:
-                print(f"Gemini API returned status code {response.status_code}: {response.text}")
-                return JSONResponse(status_code=500, content={"message": f"Gemini API returned error code {response.status_code}"})
+                print(f"Groq Chat completions returned status code {response.status_code}: {response.text}")
+                return JSONResponse(status_code=500, content={"message": f"Groq API returned error code {response.status_code}"})
             
             data = response.json()
-            reply = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text")
+            reply = data["choices"][0]["message"]["content"]
             
             if not reply:
-                return JSONResponse(status_code=500, content={"message": "Invalid reply format from Gemini API"})
+                return JSONResponse(status_code=500, content={"message": "Invalid reply format from Groq API"})
                 
             return {"reply": reply}
             

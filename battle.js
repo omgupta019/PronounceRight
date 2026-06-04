@@ -24,17 +24,34 @@
   // Speech Recognition
   let recognition = null;
   let isRecording = false;
+  let currentSegmentIndex = -1;
+  let matchedWordsCountInSegment = 0;
 
-  // Local Storage Nickname
-  try {
-    const savedNick = localStorage.getItem("pronounce_right_nickname");
-    if (savedNick) {
-      document.getElementById("usernameInput").value = savedNick;
-    }
-  } catch (e) {
-    console.error("Localstorage failed:", e);
+  // Pre-warm the backend server on page load (wakes up Render container from cold boot)
+  function preWarmBackend() {
+    const base_url = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? "http://127.0.0.1:8000"
+      : "https://pronounceright-1.onrender.com";
+      
+    fetch(`${base_url}/`)
+      .then(res => console.log("[Backend] Pre-warmed successfully"))
+      .catch(err => console.warn("[Backend] Pre-warm failed", err));
   }
 
+  async function wakeUpBackend() {
+    const base_url = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? "http://127.0.0.1:8000"
+      : "https://pronounceright-1.onrender.com";
+    
+    try {
+      // Send a quick fetch to the root endpoint
+      await fetch(`${base_url}/`, { mode: 'cors' });
+      return true;
+    } catch (e) {
+      console.warn("Backend wake up fetch failed:", e);
+      return false;
+    }
+  }
   // ===== DATABASE HISTORY LOADER =====
   async function loadBattleHistory(nickname) {
     const historyList = document.getElementById("historyList");
@@ -104,21 +121,7 @@
     }
   }
 
-  // Nickname load binder
-  const usernameInput = document.getElementById("usernameInput");
-  if (usernameInput) {
-    usernameInput.addEventListener("blur", () => {
-      const nickname = usernameInput.value.trim();
-      if (nickname) {
-        localStorage.setItem("pronounce_right_nickname", nickname);
-        loadBattleHistory(nickname);
-      }
-    });
-    // Trigger initial load if nickname is present
-    if (usernameInput.value.trim()) {
-      loadBattleHistory(usernameInput.value.trim());
-    }
-  }
+
 
   // ===== WEBSOCKETS CONTROLLER =====
   function connectLobby(lobbyId, nickname, duration = null) {
@@ -142,6 +145,8 @@
     localStreak = 0;
     localMaxStreak = 0;
     localCorrectCount = 0;
+    currentSegmentIndex = -1;
+    matchedWordsCountInSegment = 0;
     activeLobbyStatus = "waiting";
     lobbyDuration = 60;
     if (matchTimerInterval) {
@@ -314,7 +319,12 @@
 
     socket.onerror = (error) => {
       console.error("[WS] Connection error:", error);
-      alert("WebSocket connection failed. Verify the backend server is running on port 8000.");
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      if (isLocal) {
+        alert("Lobby connection failed. Please ensure your local FastAPI backend is running on port 8000.");
+      } else {
+        alert("Lobby connection failed. The AI backend server is currently starting up or offline. Please wait 20-30 seconds and try again!");
+      }
     };
   }
 
@@ -495,22 +505,85 @@
     };
 
     recognition.onresult = (event) => {
-      let finalTranscript = "";
-      let interimTranscript = "";
+      const resultIndex = event.resultIndex;
+      const result = event.results[resultIndex];
+      const transcript = result[0].transcript.trim();
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
+      document.getElementById("liveTranscriptText").textContent = transcript || "...";
+
+      if (resultIndex > currentSegmentIndex) {
+        currentSegmentIndex = resultIndex;
+        matchedWordsCountInSegment = 0;
       }
 
-      const spokenText = (finalTranscript + interimTranscript).trim();
-      document.getElementById("liveTranscriptText").textContent = spokenText || "...";
+      const spokenWords = transcript.split(/\s+/).filter(w => w.length > 0);
+      
+      while (true) {
+        const unmatchedSpokenWords = spokenWords.slice(matchedWordsCountInSegment);
+        if (unmatchedSpokenWords.length === 0) break;
 
-      if (spokenText) {
-        processVoiceMatching(spokenText);
+        if (currentWordIndex >= targetWords.length) break;
+
+        const currentTargetWord = targetWords[currentWordIndex];
+        
+        let bestMatch = null;
+        let bestMatchLength = 0;
+        let bestMatchOffset = 0;
+        let maxSeenAccuracy = 0;
+
+        for (let offset = 0; offset <= 1; offset++) {
+          if (offset >= unmatchedSpokenWords.length) break;
+
+          const candidate = unmatchedSpokenWords[offset];
+          const matchResult = evaluateMatch(currentTargetWord, candidate);
+
+          if (matchResult.accuracy > maxSeenAccuracy) {
+            maxSeenAccuracy = matchResult.accuracy;
+          }
+
+          if (matchResult.isCorrect) {
+            if (!bestMatch || matchResult.accuracy > bestMatch.accuracy) {
+              bestMatch = matchResult;
+              bestMatchLength = 1;
+              bestMatchOffset = offset;
+            }
+          }
+        }
+
+        if (bestMatch) {
+          matchedWordsCountInSegment += (bestMatchOffset + bestMatchLength);
+          
+          const span = document.getElementById(`battleWord-${currentWordIndex}`);
+          if (span) {
+            span.classList.remove("active", "incorrect");
+            span.classList.add("correct");
+          }
+
+          localCorrectCount++;
+          localStreak++;
+          if (localStreak > localMaxStreak) {
+            localMaxStreak = localStreak;
+          }
+
+          advanceWordIndex(bestMatch.accuracy);
+        } else {
+          if (result.isFinal) {
+            matchedWordsCountInSegment += 1;
+            
+            const span = document.getElementById(`battleWord-${currentWordIndex}`);
+            if (span) {
+              span.classList.remove("active");
+              span.classList.add("incorrect");
+            }
+            localStreak = 0;
+            
+            // Check if it's a structural mispronunciation for accuracy averaging
+            const accuracy = calculateAccuracy(currentTargetWord, unmatchedSpokenWords[0]);
+            advanceWordIndex(accuracy);
+          } else {
+            break;
+          }
+        }
       }
     };
 
@@ -684,47 +757,7 @@
     };
   }
 
-  function processVoiceMatching(spokenText) {
-    if (currentWordIndex >= targetWords.length) return;
 
-    // Check words starting from current index
-    const spokenTokens = spokenText.toLowerCase().trim().split(/\s+/);
-    const lastSpokenWord = spokenTokens[spokenTokens.length - 1];
-
-    const currentTargetWord = targetWords[currentWordIndex];
-    
-    // Perform Soundex match
-    const match = evaluateMatch(currentTargetWord, lastSpokenWord);
-
-    if (match.isCorrect) {
-      // Mark as correct
-      const span = document.getElementById(`battleWord-${currentWordIndex}`);
-      if (span) {
-        span.classList.remove("active", "incorrect");
-        span.classList.add("correct");
-      }
-
-      localCorrectCount++;
-      localStreak++;
-      if (localStreak > localMaxStreak) {
-        localMaxStreak = localStreak;
-      }
-
-      advanceWordIndex(match.accuracy);
-    } else {
-      // Check if it's a structural mispronunciation
-      const accuracy = calculateAccuracy(currentTargetWord, lastSpokenWord);
-      if (accuracy > 30 && accuracy < 70) {
-        const span = document.getElementById(`battleWord-${currentWordIndex}`);
-        if (span) {
-          span.classList.remove("active");
-          span.classList.add("incorrect");
-        }
-        localStreak = 0;
-        advanceWordIndex(accuracy);
-      }
-    }
-  }
 
   function advanceWordIndex(lastWordAccuracy) {
     // Calculate live accuracy average
@@ -846,18 +879,62 @@
       .replace(/'/g, "&#039;");
   }
 
-  // ===== EVENT BINDINGS =====
-  document.addEventListener("DOMContentLoaded", () => {
+  // ===== INITIALIZE =====
+  function init() {
+    // Pre-warm backend immediately on page load
+    preWarmBackend();
+
+    const usernameInput = document.getElementById("usernameInput");
     
+    // Local Storage Nickname
+    try {
+      const savedNick = localStorage.getItem("pronounce_right_nickname");
+      if (savedNick && usernameInput) {
+        usernameInput.value = savedNick;
+      }
+    } catch (e) {
+      console.error("Localstorage failed:", e);
+    }
+
+    if (usernameInput) {
+      usernameInput.addEventListener("blur", () => {
+        const nickname = usernameInput.value.trim();
+        if (nickname) {
+          localStorage.setItem("pronounce_right_nickname", nickname);
+          loadBattleHistory(nickname);
+        }
+      });
+      // Trigger initial load if nickname is present
+      if (usernameInput.value.trim()) {
+        loadBattleHistory(usernameInput.value.trim());
+      }
+    }
+
     // Create Private Room
     const createRoomBtn = document.getElementById("createRoomBtn");
     if (createRoomBtn) {
-      createRoomBtn.addEventListener("click", () => {
+      createRoomBtn.addEventListener("click", async () => {
         const nickname = document.getElementById("usernameInput").value.trim();
         if (!nickname) {
           alert("Please enter a nickname first.");
           return;
         }
+
+        const originalText = createRoomBtn.innerHTML;
+        createRoomBtn.disabled = true;
+        createRoomBtn.innerHTML = `
+          <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="22" y2="12"></line>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+          </svg>
+          Connecting to Arena...
+        `;
 
         // Get selected match duration
         const durationSelect = document.getElementById("matchDurationSelect");
@@ -866,6 +943,13 @@
         // Generate a random room code: e.g. PR-8472
         const randomNum = Math.floor(1000 + Math.random() * 9000);
         const code = `PR-${randomNum}`;
+
+        // Cold-boot wake up call
+        await wakeUpBackend();
+
+        createRoomBtn.disabled = false;
+        createRoomBtn.innerHTML = originalText;
+
         connectLobby(code, nickname, duration);
       });
     }
@@ -873,9 +957,14 @@
     // Join Private Room
     const joinRoomBtn = document.getElementById("joinRoomBtn");
     if (joinRoomBtn) {
-      joinRoomBtn.addEventListener("click", () => {
+      joinRoomBtn.addEventListener("click", async () => {
         const nickname = document.getElementById("usernameInput").value.trim();
-        const codeInput = document.getElementById("roomCodeInput").value.trim().toUpperCase();
+        let codeInput = document.getElementById("roomCodeInput").value.trim().toUpperCase();
+
+        if (codeInput && /^\d+$/.test(codeInput)) {
+          codeInput = `PR-${codeInput}`;
+          document.getElementById("roomCodeInput").value = codeInput;
+        }
 
         if (!nickname) {
           alert("Please enter a nickname first.");
@@ -885,6 +974,28 @@
           alert("Please enter a valid room code (e.g. PR-8472).");
           return;
         }
+
+        const originalText = joinRoomBtn.innerHTML;
+        joinRoomBtn.disabled = true;
+        joinRoomBtn.innerHTML = `
+          <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="22" y2="12"></line>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+          </svg>
+          Joining Room...
+        `;
+
+        // Cold-boot wake up call
+        await wakeUpBackend();
+
+        joinRoomBtn.disabled = false;
+        joinRoomBtn.innerHTML = originalText;
 
         connectLobby(codeInput, nickname);
       });
@@ -935,6 +1046,13 @@
         document.getElementById("scoreboardModal").classList.add("hidden");
       });
     }
-  });
+  }
+
+  // ===== INITIALIZE BINDING =====
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 
 })();
