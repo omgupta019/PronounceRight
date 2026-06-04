@@ -25,7 +25,6 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 
-from faster_whisper import WhisperModel
 from scoring import pronunciation_score
 from phoneme_converter import text_to_phonemes
 
@@ -46,6 +45,7 @@ _local_challenge_model = None
 def get_local_model():
     global _local_model
     if _local_model is None:
+        from faster_whisper import WhisperModel
         print("Loading local Whisper model ('base')...")
         _local_model = WhisperModel("base")
     return _local_model
@@ -53,6 +53,7 @@ def get_local_model():
 def get_local_challenge_model():
     global _local_challenge_model
     if _local_challenge_model is None:
+        from faster_whisper import WhisperModel
         print("Loading local Whisper challenge model ('tiny.en')...")
         _local_challenge_model = WhisperModel("tiny.en", compute_type="int8")
     return _local_challenge_model
