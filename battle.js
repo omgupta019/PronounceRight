@@ -57,8 +57,9 @@
     const historyList = document.getElementById("historyList");
     if (!historyList) return;
 
-    historyList.innerHTML = `
-      <div class="skeleton-card">
+    try {
+      historyList.innerHTML = `
+        <div class="skeleton-card">
         <div class="skeleton skeleton-text" style="width: 70%; height: 1.25rem;"></div>
         <div class="skeleton skeleton-text short" style="height: 1rem; margin-bottom: 0;"></div>
       </div>
